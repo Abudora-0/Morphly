@@ -1,5 +1,5 @@
 {
-  "name": "morphly-temp",
+  "name": "morphly",
   "version": "0.1.0",
   "private": true,
   "scripts": {
@@ -9,12 +9,21 @@
     "lint": "eslint"
   },
   "dependencies": {
+    "docx": "^9.7.1",
+    "exceljs": "^4.4.0",
+    "mdast-util-to-string": "^4.0.0",
     "next": "16.3.1",
+    "ollama": "^0.6.3",
+    "pptxgenjs": "^4.0.1",
     "react": "19.2.8",
-    "react-dom": "19.2.8"
+    "react-dom": "19.2.8",
+    "remark-gfm": "^4.0.1",
+    "remark-parse": "^11.0.0",
+    "unified": "^11.0.5"
   },
   "devDependencies": {
     "@tailwindcss/postcss": "^4",
+    "@types/mdast": "^4.0.4",
     "@types/node": "^20",
     "@types/react": "^19",
     "@types/react-dom": "^19",
