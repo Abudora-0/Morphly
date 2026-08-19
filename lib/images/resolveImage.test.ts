@@ -26,7 +26,7 @@ describe("resolveImage", () => {
   });
 
   it("refuses to fetch a URL that resolves to a private/loopback address (SSRF guard)", async () => {
-    // 127.0.0.1 is a loopback literal — dns.lookup resolves it without any
+    // 127.0.0.1 is a loopback literal, so dns.lookup resolves it without any
     // real network access, so this proves the IP-safety check actually
     // gates the fetch path, not just the pure isPrivateOrReservedIp helper.
     const server = http.createServer((_req, res) => {

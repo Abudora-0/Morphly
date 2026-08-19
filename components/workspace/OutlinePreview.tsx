@@ -17,13 +17,15 @@ const BLOCK_LABEL: Record<string, string> = {
 };
 
 export function OutlinePreview({ doc, isEmpty }: OutlinePreviewProps) {
+  // The empty state matches the populated state's flex-1 so the export button
+  // below stays anchored to the panel's bottom edge in both states.
   if (isEmpty) {
     return (
-      <div className="px-4 py-6">
+      <div className="min-h-0 flex-1 px-4 py-6">
         <p className="mb-5 text-sm text-ink-soft">
           The structural outline of your document will appear here as you type.
         </p>
-        <div aria-hidden className="space-y-2.5 opacity-25">
+        <div aria-hidden className="skeleton-breathe space-y-2.5">
           <div className="h-2 w-2/3 bg-line" />
           <div className="ml-3 h-2 w-2/5 bg-line" />
           <div className="ml-3 h-2 w-1/2 bg-line" />
@@ -47,7 +49,7 @@ export function OutlinePreview({ doc, isEmpty }: OutlinePreviewProps) {
             return (
               <li
                 key={i}
-                className="truncate font-mono text-xs text-ink"
+                className="truncate font-mono text-xs text-ink transition-colors duration-150 hover:bg-line/20"
                 style={{ paddingLeft: (block.level - 1) * 12 }}
               >
                 {"H" + block.level} {plainText(block.spans) || "(untitled heading)"}
@@ -67,7 +69,10 @@ export function OutlinePreview({ doc, isEmpty }: OutlinePreviewProps) {
                     : block.type;
 
           return (
-            <li key={i} className="flex items-center gap-2 truncate pl-3 font-mono text-xs text-ink-soft">
+            <li
+              key={i}
+              className="flex items-center gap-2 truncate pl-3 font-mono text-xs text-ink-soft transition-colors duration-150 hover:bg-line/20 hover:text-ink"
+            >
               <span aria-hidden>{BLOCK_LABEL[block.type] ?? "·"}</span>
               <span className="truncate">{summary}</span>
             </li>

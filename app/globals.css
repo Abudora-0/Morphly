@@ -34,6 +34,20 @@ body {
   font-family: var(--font-sans), Arial, Helvetica, sans-serif;
 }
 
+/* In-page anchors ease rather than jump, and stop clear of the sticky
+   landing header instead of tucking under it. */
+html {
+  scroll-behavior: smooth;
+}
+[id] {
+  scroll-margin-top: 5rem;
+}
+@media (prefers-reduced-motion: reduce) {
+  html {
+    scroll-behavior: auto;
+  }
+}
+
 /* Deliberate single theme: an editorial paper-and-ink surface, not a
    toggled dark mode. Keeps the Swiss/high-contrast direction intact. */
 
@@ -77,7 +91,7 @@ input:focus {
 }
 
 /* Wordmark entrance: the three color bands settle in first, then "orphly"
-   arrives — a small nod to "transforming" content. Plays once on mount,
+   arrives, a small nod to "transforming" content. Plays once on mount,
    not looped (a persistent header is not the place for a repeating
    animation) and skipped entirely for reduced-motion. */
 @keyframes wordmark-band {
@@ -118,5 +132,223 @@ input:focus {
   .wordmark-band-3,
   .wordmark-word {
     animation: none;
+  }
+}
+
+/* Reveal utilities: the same easing/duration as the wordmark entrance,
+   generalized for scroll-triggered content on the landing page. Elements
+   start hidden via [data-reveal] and get .is-visible added by an
+   IntersectionObserver once scrolled into view (see lib/useReveal.ts).
+   This keeps content in the accessibility tree and readable without JS,
+   rather than depending on JS to ever show it. */
+[data-reveal] {
+  opacity: 0;
+  transform: translateY(14px);
+}
+[data-reveal].is-visible {
+  animation: reveal-up 0.5s cubic-bezier(0.16, 1, 0.3, 1) both;
+}
+@keyframes reveal-up {
+  from {
+    opacity: 0;
+    transform: translateY(14px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+/* Flat "print sticker" hover lift: a hard offset shadow, not a soft glow,
+   consistent with the zero-blur, zero-radius editorial surface. */
+.card-lift {
+  transition:
+    transform 0.15s cubic-bezier(0.16, 1, 0.3, 1),
+    box-shadow 0.15s cubic-bezier(0.16, 1, 0.3, 1);
+}
+.card-lift:hover {
+  transform: translate(-2px, -2px);
+  box-shadow: 4px 4px 0 var(--ink);
+}
+
+/* Low-key looping "waiting for input" cue on empty-state skeleton bars,
+   shared by the tool's own outline preview and the landing page's
+   illustrative copy of it, so the two stay visually consistent. */
+@keyframes skeleton-breathe {
+  0%,
+  100% {
+    opacity: 0.25;
+  }
+  50% {
+    opacity: 0.4;
+  }
+}
+.skeleton-breathe {
+  animation: skeleton-breathe 2.4s ease-in-out infinite;
+}
+
+/* Page-load entrance for above-the-fold content, which never gets a scroll
+   event to trigger [data-reveal]. Same curve as everything else; the
+   stagger is set per-element with an inline animation-delay. */
+@keyframes enter-up {
+  from {
+    opacity: 0;
+    transform: translateY(16px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+.enter-up {
+  animation: enter-up 0.55s cubic-bezier(0.16, 1, 0.3, 1) both;
+}
+
+/* Rule that draws itself in, used under section headings. */
+@keyframes rule-draw {
+  from {
+    transform: scaleX(0);
+  }
+  to {
+    transform: scaleX(1);
+  }
+}
+.rule-draw {
+  transform-origin: left center;
+  animation: rule-draw 0.6s cubic-bezier(0.16, 1, 0.3, 1) both;
+}
+
+/* Underline that wipes in from the left on hover, instead of a static
+   text-decoration toggling color. Painted as a background layer so it
+   never reflows the text. */
+.underline-wipe {
+  background-image: linear-gradient(var(--ink), var(--ink));
+  background-repeat: no-repeat;
+  background-position: 0 100%;
+  background-size: 0% 1px;
+  transition: background-size 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+  padding-bottom: 2px;
+}
+.underline-wipe:hover,
+.underline-wipe:focus-visible {
+  background-size: 100% 1px;
+}
+
+/* Arrow glyphs travel a few px in their own direction on hover. Paired
+   with `group` on the parent so the whole control drives the motion. */
+.arrow-shift {
+  transition: transform 0.2s cubic-bezier(0.16, 1, 0.3, 1);
+}
+.group:hover .arrow-shift-right {
+  transform: translateX(3px);
+}
+.group:hover .arrow-shift-down {
+  transform: translateY(3px);
+}
+.group:hover .arrow-shift-out {
+  transform: translate(2px, -2px);
+}
+
+/* Accent rule above the format cards/tabs thickens on hover: the flat,
+   printerly equivalent of a lift. */
+.accent-bar {
+  transition: height 0.2s cubic-bezier(0.16, 1, 0.3, 1);
+}
+.group:hover .accent-bar {
+  height: 6px;
+}
+
+/* The mark's three bands fan apart slightly when the lockup is hovered,
+   echoing the one-source/three-formats idea. */
+.wordmark-hover-band {
+  transition: transform 0.35s cubic-bezier(0.16, 1, 0.3, 1);
+}
+.group:hover .wordmark-hover-band-1 {
+  transform: translateY(-2px);
+}
+.group:hover .wordmark-hover-band-3 {
+  transform: translateY(2px);
+}
+
+/* Reading-progress hairline pinned to the top of the landing page. */
+.scroll-progress {
+  transform-origin: left center;
+  transition: transform 0.1s linear;
+}
+
+/* Landing header gains its rule only once the page has scrolled under it. */
+.header-sticky {
+  transition:
+    border-color 0.3s ease,
+    background-color 0.3s ease;
+}
+
+/* Row highlight for the spec/properties list. */
+.spec-row {
+  transition:
+    background-color 0.2s ease,
+    padding-left 0.2s cubic-bezier(0.16, 1, 0.3, 1);
+}
+.spec-row:hover {
+  background-color: color-mix(in srgb, var(--line) 18%, transparent);
+  padding-left: 1.25rem;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  [data-reveal] {
+    opacity: 1;
+    transform: none;
+  }
+  [data-reveal].is-visible {
+    animation: none;
+  }
+  .card-lift,
+  .card-lift:hover {
+    transition: none;
+    transform: none;
+  }
+  .skeleton-breathe,
+  .enter-up,
+  .rule-draw {
+    animation: none;
+  }
+  .rule-draw {
+    transform: none;
+  }
+  .underline-wipe {
+    transition: none;
+    background-size: 100% 1px;
+  }
+  .arrow-shift,
+  .accent-bar,
+  .wordmark-hover-band,
+  .spec-row,
+  .header-sticky {
+    transition: none;
+  }
+  .group:hover .arrow-shift-right,
+  .group:hover .arrow-shift-down,
+  .group:hover .arrow-shift-out,
+  .group:hover .wordmark-hover-band-1,
+  .group:hover .wordmark-hover-band-3 {
+    transform: none;
+  }
+  .group:hover .accent-bar {
+    height: 3px;
+  }
+  .spec-row:hover {
+    padding-left: 1rem;
+  }
+
+  /* Catch-all for the transitions written as inline Tailwind utilities
+     (step-card hovers, chip lift, textarea tint) rather than as named
+     classes above. Collapses their duration instead of removing the rule,
+     so end states still apply, just without the travel. */
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
   }
 }

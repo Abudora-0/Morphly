@@ -1,25 +1,22 @@
-import { Workspace } from "@/components/workspace/Workspace";
-import { Wordmark } from "@/components/ui/Wordmark";
+import { LandingHeader } from "@/components/landing/LandingHeader";
+import { Hero } from "@/components/landing/Hero";
+import { HowItWorks } from "@/components/landing/HowItWorks";
+import { FormatShowcase } from "@/components/landing/FormatShowcase";
+import { LivePreview } from "@/components/landing/LivePreview";
+import { SecuritySpec } from "@/components/landing/SecuritySpec";
+import { FinalCta } from "@/components/landing/FinalCta";
 
 export default function Home() {
   return (
-    <div className="flex h-dvh flex-col">
-      <header className="flex items-center justify-between border-b border-line px-5 py-3">
-        <div className="flex items-baseline gap-3">
-          <h1 className="leading-none">
-            <Wordmark />
-          </h1>
-          <p className="hidden font-mono text-[11px] uppercase tracking-wider text-ink-soft sm:block">
-            AI text → native Office files
-          </p>
-        </div>
-        <p className="flex items-center gap-2 font-mono text-[11px] uppercase tracking-wider text-ink-soft">
-          <span aria-hidden className="h-1.5 w-1.5 bg-excel" />
-          No account required
-        </p>
-      </header>
-      <main className="flex min-h-0 flex-1 flex-col p-4">
-        <Workspace />
+    <div className="flex min-h-dvh flex-col">
+      <LandingHeader />
+      <main className="flex-1">
+        <Hero />
+        <HowItWorks />
+        <FormatShowcase />
+        <LivePreview />
+        <SecuritySpec />
+        <FinalCta />
       </main>
     </div>
   );

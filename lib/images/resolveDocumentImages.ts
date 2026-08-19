@@ -4,7 +4,7 @@ import { MAX_IMAGES_PER_DOCUMENT } from "@/lib/limits";
 
 /**
  * Fetches and decodes every image block in a document, in parallel, up to
- * MAX_IMAGES_PER_DOCUMENT — beyond that cap, remaining images are left
+ * MAX_IMAGES_PER_DOCUMENT. Beyond that cap, remaining images are left
  * unresolved (generators render an "unavailable" fallback for those), so a
  * paste with hundreds of image links can't fan out into hundreds of
  * concurrent fetches.

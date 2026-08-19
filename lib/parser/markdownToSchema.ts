@@ -39,7 +39,7 @@ function convertBlock(node: RootContent): Block | null {
 
     case "paragraph": {
       // An image on its own line (`![alt](url)`) becomes a dedicated image
-      // block rather than a paragraph — that's the overwhelmingly common
+      // block rather than a paragraph, since that's the overwhelmingly common
       // case in pasted content, and the format generators need a real
       // block to anchor/size the embedded image against, not inline text.
       // An image mixed with other text is left as a paragraph and the

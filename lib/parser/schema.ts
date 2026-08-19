@@ -27,7 +27,7 @@ export type Block =
   | { type: "code"; text: string; language?: string }
   | { type: "divider" }
   // `resolved` is filled in by lib/images/resolveDocumentImages.ts between
-  // parsing and generation — the parser only ever produces url/alt.
+  // parsing and generation; the parser only ever produces url/alt.
   // Left undefined when the image couldn't be fetched/validated; generators
   // render an "unavailable" fallback in that case.
   | { type: "image"; url: string; alt: string; resolved?: ResolvedImage };

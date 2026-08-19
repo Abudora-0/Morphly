@@ -5,7 +5,7 @@ import type { PptxOptions } from "@/lib/exportFormat";
 import { DEFAULT_EXPORT_OPTIONS } from "@/lib/exportFormat";
 
 // Layout constants anchored near the top of the slide, valid regardless of
-// slide height — both supported layouts share the same 10in width.
+// slide height, since both supported layouts share the same 10in width.
 const MARGIN_X = 0.5;
 const CONTENT_W = 9;
 const TITLE_Y = 0.35;
@@ -202,7 +202,7 @@ class SlideBuilder {
     } else {
       const { data, format, width, height } = block.resolved;
       // pptxgenjs's w/h are in inches, but width/height here are pixels
-      // (from image-size) — convert at 96dpi before fitting, otherwise a
+      // (from image-size), so convert at 96dpi before fitting, otherwise a
       // small source image (e.g. a 72px icon) gets scaled up to fill the
       // whole content box and comes out blurry.
       const nativeW = width / PX_PER_INCH;

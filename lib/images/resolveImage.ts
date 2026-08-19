@@ -10,15 +10,15 @@ const MAX_REDIRECTS = 4;
 /**
  * Resolves a markdown image URL (remote http(s) or a data: URI) into actual
  * decoded bytes + dimensions, ready to embed in an OOXML file. Returns null
- * on any failure — unreachable, too large, wrong format, blocked as
- * SSRF-unsafe, etc. — so a bad image degrades the document instead of
+ * on any failure (unreachable, too large, wrong format, blocked as
+ * SSRF-unsafe, and so on), so a bad image degrades the document instead of
  * failing the whole conversion.
  *
  * Known limitation: the DNS-resolved IP is validated before each fetch, but
  * fetch() re-resolves DNS itself, leaving a narrow DNS-rebinding race where
  * a hostname could resolve differently between the check and the request.
  * Closing that fully would mean pinning the connection to the resolved IP
- * via a custom dispatcher — more machinery than this project's threat model
+ * via a custom dispatcher, which is more machinery than this project's threat model
  * (a small public tool, not a high-value target) currently justifies. The
  * protocol allowlist, private-IP block, redirect re-validation, and
  * size/time limits below cover the realistic cases.

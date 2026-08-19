@@ -39,7 +39,7 @@ function isPrivateIpv6(ip: string): boolean {
   if (normalized.startsWith("fe8") || normalized.startsWith("fe9")) return true; // fe80::/10 link-local
   if (normalized.startsWith("fea") || normalized.startsWith("feb")) return true;
 
-  // IPv4-mapped (::ffff:a.b.c.d) — validate the embedded IPv4 instead.
+  // IPv4-mapped (::ffff:a.b.c.d): validate the embedded IPv4 instead.
   const mapped = normalized.match(/^::ffff:(\d+\.\d+\.\d+\.\d+)$/);
   if (mapped) return isPrivateIpv4(mapped[1]);
 

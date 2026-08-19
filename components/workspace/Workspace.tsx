@@ -1,6 +1,6 @@
 "use client";
 
-import { useMemo, useState } from "react";
+import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { markdownToSchema } from "@/lib/parser/markdownToSchema";
 import type { ExportFormat, ExportOptions } from "@/lib/exportFormat";
 import { DEFAULT_EXPORT_OPTIONS } from "@/lib/exportFormat";
@@ -14,6 +14,8 @@ export function Workspace() {
   const [options, setOptions] = useState<ExportOptions>(DEFAULT_EXPORT_OPTIONS);
   const [isConverting, setIsConverting] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [didExport, setDidExport] = useState(false);
+  const exportResetTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
 
   const [isSmartFormatting, setIsSmartFormatting] = useState(false);
   const [smartFormatError, setSmartFormatError] = useState<string | null>(null);
@@ -61,7 +63,8 @@ export function Workspace() {
     setOptions((prev) => ({ ...prev, [target]: { ...prev[target], ...partial } }));
   }
 
-  async function handleExport() {
+  const handleExport = useCallback(async () => {
+    if (isEmpty || isConverting) return;
     setError(null);
     setIsConverting(true);
     try {
@@ -89,12 +92,33 @@ export function Workspace() {
       link.click();
       link.remove();
       URL.revokeObjectURL(url);
+
+      // Briefly confirm on the button itself, so a download that the browser
+      // handles silently still produces visible feedback.
+      setDidExport(true);
+      if (exportResetTimer.current) clearTimeout(exportResetTimer.current);
+      exportResetTimer.current = setTimeout(() => setDidExport(false), 2200);
     } catch (err) {
       setError(err instanceof Error ? err.message : "Something went wrong.");
     } finally {
       setIsConverting(false);
     }
-  }
+  }, [isEmpty, isConverting, text, format, options]);
+
+  useEffect(() => () => {
+    if (exportResetTimer.current) clearTimeout(exportResetTimer.current);
+  }, []);
+
+  useEffect(() => {
+    function onKeyDown(e: KeyboardEvent) {
+      if ((e.ctrlKey || e.metaKey) && e.key === "Enter") {
+        e.preventDefault();
+        void handleExport();
+      }
+    }
+    window.addEventListener("keydown", onKeyDown);
+    return () => window.removeEventListener("keydown", onKeyDown);
+  }, [handleExport]);
 
   return (
     <div className="flex min-h-0 flex-1 flex-col divide-y divide-line border border-line lg:flex-row lg:divide-x lg:divide-y-0">
@@ -104,6 +128,7 @@ export function Workspace() {
         onSmartFormat={handleSmartFormat}
         isSmartFormatting={isSmartFormatting}
         smartFormatError={smartFormatError}
+        onDismissSmartFormatError={() => setSmartFormatError(null)}
         canUndoSmartFormat={preSmartFormatText !== null}
         onUndoSmartFormat={handleUndoSmartFormat}
       />
@@ -115,7 +140,9 @@ export function Workspace() {
         doc={doc}
         isEmpty={isEmpty}
         isConverting={isConverting}
+        didExport={didExport}
         error={error}
+        onDismissError={() => setError(null)}
         onExport={handleExport}
       />
     </div>

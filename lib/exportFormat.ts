@@ -23,7 +23,7 @@ export type ExportOptions = {
 };
 
 // Every default below preserves the generators' pre-existing behavior
-// exactly — these options are purely additive, not a behavior change.
+// exactly, since these options are purely additive, not a behavior change.
 export const DEFAULT_EXPORT_OPTIONS: ExportOptions = {
   docx: { pageSize: "letter", titlePage: false },
   xlsx: { includeOverview: true, freezeHeader: true },

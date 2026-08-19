@@ -174,7 +174,7 @@ function addOverviewRow(workbook: ExcelJS.Workbook, sheet: ExcelJS.Worksheet, en
 
       // exceljs's own .d.ts declares an ambient `Buffer` interface that
       // collides with (and structurally disagrees with) Node's real Buffer
-      // type — same upstream quirk worked around in generateXlsx's own
+      // type, the same upstream quirk worked around in generateXlsx's own
       // writeBuffer() call. The value is a genuine Node Buffer either way.
       const imageId = workbook.addImage({
         buffer: data as unknown as ExcelJS.Buffer,

@@ -1,6 +1,8 @@
 import type { MorphlyDocument } from "@/lib/parser/schema";
 import type { ExportFormat, ExportOptions } from "@/lib/exportFormat";
 import { FormatTab } from "@/components/ui/FormatTab";
+import { Arrow } from "@/components/ui/Arrow";
+import { Icon } from "@/components/ui/Icon";
 import { OutlinePreview } from "@/components/workspace/OutlinePreview";
 import { FormatOptions } from "@/components/workspace/FormatOptions";
 
@@ -18,7 +20,9 @@ type ConfigPanelProps = {
   doc: MorphlyDocument;
   isEmpty: boolean;
   isConverting: boolean;
+  didExport: boolean;
   error: string | null;
+  onDismissError: () => void;
   onExport: () => void;
 };
 
@@ -30,7 +34,9 @@ export function ConfigPanel({
   doc,
   isEmpty,
   isConverting,
+  didExport,
   error,
+  onDismissError,
   onExport,
 }: ConfigPanelProps) {
   const activeAccent = FORMATS.find((f) => f.id === format)?.accent ?? "var(--word)";
@@ -63,25 +69,58 @@ export function ConfigPanel({
         <FormatOptions format={format} options={options} onChange={onOptionsChange} />
       </div>
 
-      <div className="border-b border-line px-4 py-2.5">
+      <div className="flex items-center justify-between border-b border-line px-4 py-2.5">
         <h2 className="font-mono text-[11px] uppercase tracking-wider text-ink-soft">04 / Structure Preview</h2>
+        {!isEmpty && (
+          <span className="font-mono text-[11px] tabular-nums text-ink-soft">
+            {doc.blocks.length} {doc.blocks.length === 1 ? "block" : "blocks"}
+          </span>
+        )}
       </div>
 
       <OutlinePreview doc={doc} isEmpty={isEmpty} />
 
       <div className="border-t border-line p-4">
         {error && (
-          <p className="mb-3 border border-line bg-line/10 px-3 py-2 font-mono text-xs text-ink">{error}</p>
+          <div
+            data-reveal
+            className="is-visible mb-3 flex items-start justify-between gap-3 border border-ppt/40 bg-ppt/[0.07] px-3 py-2"
+          >
+            <p className="font-mono text-xs leading-relaxed text-ink">{error}</p>
+            <button
+              type="button"
+              onClick={onDismissError}
+              aria-label="Dismiss error"
+              className="mt-0.5 text-ink-soft transition-colors duration-150 hover:text-ink active:scale-90"
+            >
+              <Icon name="close" className="h-3 w-3" />
+            </button>
+          </div>
         )}
         <button
           type="button"
           onClick={onExport}
           disabled={isEmpty || isConverting}
-          className="w-full border py-3 text-sm font-medium uppercase tracking-wider text-paper transition duration-150 hover:brightness-95 active:scale-[0.99] active:brightness-90 disabled:cursor-not-allowed disabled:opacity-30 disabled:hover:brightness-100 disabled:active:scale-100"
+          className="group flex w-full items-center justify-center gap-2.5 border py-3 text-sm font-medium uppercase tracking-wider text-paper transition duration-150 hover:brightness-95 active:scale-[0.99] active:brightness-90 disabled:cursor-not-allowed disabled:opacity-30 disabled:hover:brightness-100 disabled:active:scale-100"
           style={{ background: activeAccent, borderColor: activeAccent }}
         >
-          {isConverting ? <span className="animate-pulse">Converting…</span> : `Export .${format}`}
+          {isConverting ? (
+            <span className="animate-pulse">Converting…</span>
+          ) : didExport ? (
+            <>
+              <Icon name="check" className="h-4 w-4" />
+              Downloaded
+            </>
+          ) : (
+            <>
+              Export .{format}
+              <Arrow direction="down" className="h-4 w-4" />
+            </>
+          )}
         </button>
+        <p className="mt-2 text-center font-mono text-[10px] uppercase tracking-wider text-ink-soft/70">
+          <kbd className="font-mono">Ctrl</kbd> + <kbd className="font-mono">Enter</kbd> to export
+        </p>
       </div>
     </div>
   );

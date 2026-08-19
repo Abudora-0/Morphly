@@ -2,7 +2,7 @@ import type { NextRequest } from "next/server";
 
 // Best-effort in-memory rate limiting. Vercel serverless functions are
 // ephemeral and can run across multiple instances, so this doesn't give
-// perfectly accurate global limits — but it meaningfully raises the bar
+// perfectly accurate global limits, but it meaningfully raises the bar
 // against casual scripted abuse without provisioning external infrastructure
 // (Redis/KV), which would need its own setup and account.
 
