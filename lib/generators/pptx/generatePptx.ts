@@ -1,16 +1,20 @@
 import PptxGenJS from "pptxgenjs";
 import type { Block, MorphlyDocument } from "@/lib/parser/schema";
 import { plainText } from "@/lib/parser/schema";
+import type { PptxOptions } from "@/lib/exportFormat";
+import { DEFAULT_EXPORT_OPTIONS } from "@/lib/exportFormat";
 
-// Layout constants for the default 16:9 (10in x 5.625in) canvas.
+// Layout constants anchored near the top of the slide, valid regardless of
+// slide height — both supported layouts share the same 10in width.
 const MARGIN_X = 0.5;
 const CONTENT_W = 9;
 const TITLE_Y = 0.35;
 const TITLE_H = 0.7;
 const RULE_Y = 1.12;
 const CONTENT_Y = 1.3;
-const CONTENT_BOTTOM = 5.2;
+const BOTTOM_MARGIN = 0.4;
 const GAP = 0.12;
+const TITLE_SLIDE_BOX_H = 1.4;
 
 const ACCENT = "C8410C"; // PowerPoint orange, used only as a title underline
 const INK = "141414";
@@ -18,16 +22,27 @@ const INK_SOFT = "55534D";
 const HEADER_FILL = "EDE9E2";
 const CODE_FILL = "F3F3F1";
 
-export async function generatePptx(doc: MorphlyDocument): Promise<Buffer> {
+const SLIDE_LAYOUTS = {
+  "16:9": { name: "LAYOUT_16x9", height: 5.625 },
+  "4:3": { name: "LAYOUT_4x3", height: 7.5 },
+} as const;
+
+export async function generatePptx(
+  doc: MorphlyDocument,
+  options: PptxOptions = DEFAULT_EXPORT_OPTIONS.pptx,
+): Promise<Buffer> {
+  const layout = SLIDE_LAYOUTS[options.slideSize];
+  const contentBottom = layout.height - BOTTOM_MARGIN;
+
   const pptx = new PptxGenJS();
   pptx.author = "Morphly";
   pptx.title = doc.title || "Morphly Export";
-  pptx.layout = "LAYOUT_16x9";
+  pptx.layout = layout.name;
 
-  const builder = new SlideBuilder(pptx);
+  const builder = new SlideBuilder(pptx, contentBottom);
 
-  if (doc.title) {
-    builder.addTitleSlide(doc.title);
+  if (doc.title && options.titleSlide) {
+    builder.addTitleSlide(doc.title, layout.height);
   }
 
   let lastHeading = doc.title ?? "";
@@ -60,21 +75,24 @@ export async function generatePptx(doc: MorphlyDocument): Promise<Buffer> {
 
 class SlideBuilder {
   private pptx: PptxGenJS;
+  private contentBottom: number;
   private slide: PptxGenJS.Slide | null = null;
-  private y = CONTENT_Y;
+  private y: number;
   private pendingBreak = false;
 
-  constructor(pptx: PptxGenJS) {
+  constructor(pptx: PptxGenJS, contentBottom: number) {
     this.pptx = pptx;
+    this.contentBottom = contentBottom;
+    this.y = CONTENT_Y;
   }
 
-  addTitleSlide(title: string) {
+  addTitleSlide(title: string, slideHeight: number) {
     const slide = this.pptx.addSlide();
     slide.addText(title, {
       x: MARGIN_X,
-      y: 2.1,
+      y: slideHeight / 2 - TITLE_SLIDE_BOX_H / 2,
       w: CONTENT_W,
-      h: 1.4,
+      h: TITLE_SLIDE_BOX_H,
       align: "center",
       valign: "middle",
       fontSize: 36,
@@ -127,7 +145,7 @@ class SlideBuilder {
       x: MARGIN_X,
       y: CONTENT_Y,
       w: CONTENT_W,
-      h: CONTENT_BOTTOM - CONTENT_Y,
+      h: this.contentBottom - CONTENT_Y,
       autoPage: true,
       autoPageCharWeight: 0.2,
       border: { type: "solid", color: "D8D5CC", pt: 0.75 },
@@ -183,7 +201,7 @@ class SlideBuilder {
       let index = 0;
       while (index < block.items.length) {
         this.ensureRoom(ITEM_H, headingContext);
-        const roomLeft = Math.max(ITEM_H, CONTENT_BOTTOM - this.y);
+        const roomLeft = Math.max(ITEM_H, this.contentBottom - this.y);
         const chunkSize = Math.max(1, Math.min(block.items.length - index, Math.floor(roomLeft / ITEM_H)));
         const chunk = block.items.slice(index, index + chunkSize);
 
@@ -269,7 +287,7 @@ class SlideBuilder {
   }
 
   private ensureRoom(height: number, headingContext: string) {
-    const isOverflow = Boolean(this.slide) && !this.pendingBreak && this.y + height > CONTENT_BOTTOM;
+    const isOverflow = Boolean(this.slide) && !this.pendingBreak && this.y + height > this.contentBottom;
     const needsNewSlide = !this.slide || this.pendingBreak || isOverflow;
     if (!needsNewSlide) return;
 

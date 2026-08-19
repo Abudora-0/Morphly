@@ -1,6 +1,8 @@
 import ExcelJS from "exceljs";
 import type { Block, MorphlyDocument } from "@/lib/parser/schema";
 import { plainText } from "@/lib/parser/schema";
+import type { XlsxOptions } from "@/lib/exportFormat";
+import { DEFAULT_EXPORT_OPTIONS } from "@/lib/exportFormat";
 
 const HEADER_FILL: ExcelJS.Fill = { type: "pattern", pattern: "solid", fgColor: { argb: "FFE7E5DE" } };
 const HEADER_BORDER: Partial<ExcelJS.Borders> = {
@@ -16,7 +18,10 @@ type TableSheet = {
   rows: string[][];
 };
 
-export async function generateXlsx(doc: MorphlyDocument): Promise<Buffer> {
+export async function generateXlsx(
+  doc: MorphlyDocument,
+  options: XlsxOptions = DEFAULT_EXPORT_OPTIONS.xlsx,
+): Promise<Buffer> {
   const workbook = new ExcelJS.Workbook();
   workbook.creator = "Morphly";
   workbook.created = new Date();
@@ -25,7 +30,8 @@ export async function generateXlsx(doc: MorphlyDocument): Promise<Buffer> {
   const usedNames = new Set<string>();
 
   const hasNonTableContent = overviewBlocks.some((entry) => entry.block.type !== "table");
-  const shouldRenderOverview = Boolean(doc.title) || hasNonTableContent || tables.length > 1;
+  const shouldRenderOverview =
+    options.includeOverview && (Boolean(doc.title) || hasNonTableContent || tables.length > 1);
 
   if (shouldRenderOverview) {
     const overviewName = reserveName("Overview", usedNames);
@@ -34,7 +40,7 @@ export async function generateXlsx(doc: MorphlyDocument): Promise<Buffer> {
 
   for (const table of tables) {
     const sheetName = reserveName(table.name, usedNames);
-    buildTableSheet(workbook.addWorksheet(sheetName), table.headers, table.rows);
+    buildTableSheet(workbook.addWorksheet(sheetName), table.headers, table.rows, options.freezeHeader);
   }
 
   if (workbook.worksheets.length === 0) {
@@ -155,7 +161,12 @@ function addOverviewRow(sheet: ExcelJS.Worksheet, entry: OverviewEntry) {
 
 // --- Table sheets ---------------------------------------------------------
 
-function buildTableSheet(sheet: ExcelJS.Worksheet, headers: string[], rows: string[][]) {
+function buildTableSheet(
+  sheet: ExcelJS.Worksheet,
+  headers: string[],
+  rows: string[][],
+  freezeHeader: boolean,
+) {
   sheet.columns = headers.map((header, i) => ({ width: columnWidth(header, rows, i) }));
 
   const headerRow = sheet.addRow(headers);
@@ -169,7 +180,9 @@ function buildTableSheet(sheet: ExcelJS.Worksheet, headers: string[], rows: stri
     sheet.addRow(row);
   }
 
-  sheet.views = [{ state: "frozen", ySplit: 1 }];
+  if (freezeHeader) {
+    sheet.views = [{ state: "frozen", ySplit: 1 }];
+  }
   sheet.autoFilter = {
     from: { row: 1, column: 1 },
     to: { row: 1, column: Math.max(headers.length, 1) },

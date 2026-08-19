@@ -1,7 +1,8 @@
 import type { MorphlyDocument } from "@/lib/parser/schema";
-import type { ExportFormat } from "@/lib/exportFormat";
+import type { ExportFormat, ExportOptions } from "@/lib/exportFormat";
 import { FormatTab } from "@/components/ui/FormatTab";
 import { OutlinePreview } from "@/components/workspace/OutlinePreview";
+import { FormatOptions } from "@/components/workspace/FormatOptions";
 
 const FORMATS: { id: ExportFormat; label: string; extension: string; accent: string; disabled?: boolean }[] = [
   { id: "docx", label: "Word", extension: "docx", accent: "var(--word)" },
@@ -12,6 +13,8 @@ const FORMATS: { id: ExportFormat; label: string; extension: string; accent: str
 type ConfigPanelProps = {
   format: ExportFormat;
   onFormatChange: (format: ExportFormat) => void;
+  options: ExportOptions;
+  onOptionsChange: <F extends ExportFormat>(format: F, partial: Partial<ExportOptions[F]>) => void;
   doc: MorphlyDocument;
   isEmpty: boolean;
   isConverting: boolean;
@@ -22,6 +25,8 @@ type ConfigPanelProps = {
 export function ConfigPanel({
   format,
   onFormatChange,
+  options,
+  onOptionsChange,
   doc,
   isEmpty,
   isConverting,
@@ -51,7 +56,15 @@ export function ConfigPanel({
       </div>
 
       <div className="border-b border-line px-4 py-2.5">
-        <h2 className="font-mono text-[11px] uppercase tracking-wider text-ink-soft">03 / Structure Preview</h2>
+        <h2 className="font-mono text-[11px] uppercase tracking-wider text-ink-soft">03 / Configure</h2>
+      </div>
+
+      <div className="border-b border-line px-4 py-1">
+        <FormatOptions format={format} options={options} onChange={onOptionsChange} />
+      </div>
+
+      <div className="border-b border-line px-4 py-2.5">
+        <h2 className="font-mono text-[11px] uppercase tracking-wider text-ink-soft">04 / Structure Preview</h2>
       </div>
 
       <OutlinePreview doc={doc} isEmpty={isEmpty} />

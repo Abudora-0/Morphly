@@ -12,8 +12,12 @@ import {
   TableRow,
   TextRun,
   WidthType,
+  convertInchesToTwip,
+  convertMillimetersToTwip,
 } from "docx";
 import type { Block, InlineSpan, MorphlyDocument } from "@/lib/parser/schema";
+import type { DocxOptions } from "@/lib/exportFormat";
+import { DEFAULT_EXPORT_OPTIONS } from "@/lib/exportFormat";
 
 const BULLET_LIST = "morphly-bullet";
 const ORDERED_LIST = "morphly-ordered";
@@ -28,7 +32,15 @@ const HEADING_MAP = {
   4: HeadingLevel.HEADING_4,
 } as const;
 
-export async function generateDocx(doc: MorphlyDocument): Promise<Buffer> {
+const PAGE_SIZES = {
+  letter: { width: convertInchesToTwip(8.5), height: convertInchesToTwip(11) },
+  a4: { width: convertMillimetersToTwip(210), height: convertMillimetersToTwip(297) },
+};
+
+export async function generateDocx(
+  doc: MorphlyDocument,
+  options: DocxOptions = DEFAULT_EXPORT_OPTIONS.docx,
+): Promise<Buffer> {
   const children: (Paragraph | Table)[] = [];
 
   if (doc.title) {
@@ -38,6 +50,9 @@ export async function generateDocx(doc: MorphlyDocument): Promise<Buffer> {
         children: [new TextRun(doc.title)],
       }),
     );
+    if (options.titlePage) {
+      children.push(new Paragraph({ pageBreakBefore: true, children: [] }));
+    }
   }
 
   for (const block of doc.blocks) {
@@ -75,7 +90,7 @@ export async function generateDocx(doc: MorphlyDocument): Promise<Buffer> {
         },
       ],
     },
-    sections: [{ children }],
+    sections: [{ properties: { page: { size: PAGE_SIZES[options.pageSize] } }, children }],
   });
 
   return Packer.toBuffer(document);

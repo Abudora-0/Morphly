@@ -2,13 +2,15 @@
 
 import { useMemo, useState } from "react";
 import { markdownToSchema } from "@/lib/parser/markdownToSchema";
-import type { ExportFormat } from "@/lib/exportFormat";
+import type { ExportFormat, ExportOptions } from "@/lib/exportFormat";
+import { DEFAULT_EXPORT_OPTIONS } from "@/lib/exportFormat";
 import { InputPanel } from "@/components/workspace/InputPanel";
 import { ConfigPanel } from "@/components/workspace/ConfigPanel";
 
 export function Workspace() {
   const [text, setText] = useState("");
   const [format, setFormat] = useState<ExportFormat>("docx");
+  const [options, setOptions] = useState<ExportOptions>(DEFAULT_EXPORT_OPTIONS);
   const [isConverting, setIsConverting] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
@@ -54,6 +56,10 @@ export function Workspace() {
     setPreSmartFormatText(null);
   }
 
+  function handleOptionsChange<F extends ExportFormat>(target: F, partial: Partial<ExportOptions[F]>) {
+    setOptions((prev) => ({ ...prev, [target]: { ...prev[target], ...partial } }));
+  }
+
   async function handleExport() {
     setError(null);
     setIsConverting(true);
@@ -61,7 +67,7 @@ export function Workspace() {
       const res = await fetch("/api/convert", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ text, format }),
+        body: JSON.stringify({ text, format, options: options[format] }),
       });
 
       if (!res.ok) {
@@ -103,6 +109,8 @@ export function Workspace() {
       <ConfigPanel
         format={format}
         onFormatChange={setFormat}
+        options={options}
+        onOptionsChange={handleOptionsChange}
         doc={doc}
         isEmpty={isEmpty}
         isConverting={isConverting}
