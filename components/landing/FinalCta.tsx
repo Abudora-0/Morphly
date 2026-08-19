@@ -21,7 +21,7 @@ export function FinalCta() {
               <Arrow className="h-4 w-4" />
             </Link>
             <a
-              href="https://github.com/Abudora-0/morphly"
+              href="https://github.com/Abudora-0/Morphly"
               target="_blank"
               rel="noopener noreferrer"
               className="group flex items-center gap-2 font-mono text-[11px] uppercase tracking-wider text-ink-soft transition-colors duration-150 hover:text-ink"

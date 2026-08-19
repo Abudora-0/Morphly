@@ -16,7 +16,7 @@
 
 **Paste raw text or AI-generated output. Export a real, native Office file.**
 
-[Live demo](https://morphly-beta.vercel.app) · [Report a bug](https://github.com/Abudora-0/morphly/issues)
+[Live demo](https://morphly-beta.vercel.app) · [Report a bug](https://github.com/Abudora-0/Morphly/issues)
 
 </div>
 
