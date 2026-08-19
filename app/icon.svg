@@ -1,6 +1,10 @@
-<svg width="32" height="32" viewBox="0 0 32 32" xmlns="http://www.w3.org/2000/svg">
-  <rect width="32" height="32" fill="#141414" />
-  <rect x="6.5" y="15" width="5" height="12" fill="#2B579A" />
-  <rect x="13.5" y="9" width="5" height="18" fill="#217346" />
-  <rect x="20.5" y="3" width="5" height="24" fill="#C8410C" />
+<svg width="32" height="32" viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg">
+  <defs>
+    <clipPath id="ic-l"><rect x="0" y="0" width="34" height="100" /></clipPath>
+    <clipPath id="ic-m"><rect x="34" y="0" width="33" height="100" /></clipPath>
+    <clipPath id="ic-r"><rect x="67" y="0" width="33" height="100" /></clipPath>
+  </defs>
+  <path d="M10,18 L10,82 L28,82 L28,42 L50,66 L72,42 L72,82 L90,82 L90,18 L72,18 L50,40 L28,18 Z" fill="#2B579A" clip-path="url(#ic-l)" />
+  <path d="M10,18 L10,82 L28,82 L28,42 L50,66 L72,42 L72,82 L90,82 L90,18 L72,18 L50,40 L28,18 Z" fill="#217346" clip-path="url(#ic-m)" />
+  <path d="M10,18 L10,82 L28,82 L28,42 L50,66 L72,42 L72,82 L90,82 L90,18 L72,18 L50,40 L28,18 Z" fill="#C8410C" clip-path="url(#ic-r)" />
 </svg>
