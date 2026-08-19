@@ -3,8 +3,15 @@ import { createOllamaProvider, getOllamaModelName } from "@/lib/llm/ollamaProvid
 import { LLMProviderError } from "@/lib/llm/provider";
 import { checkRateLimit, getClientIp } from "@/lib/rateLimit";
 import { MAX_TEXT_LENGTH, SMART_FORMAT_RATE_LIMIT } from "@/lib/limits";
+import { isSmartFormatEnabled } from "@/lib/smartFormat";
 
 export async function POST(request: NextRequest) {
+  // The UI hides the button when this is off; refuse here too so the
+  // endpoint isn't left reachable only to fail against an absent Ollama.
+  if (!isSmartFormatEnabled()) {
+    return NextResponse.json({ error: "Smart Format is not available." }, { status: 404 });
+  }
+
   const rateLimit = checkRateLimit(
     `smart-format:${getClientIp(request)}`,
     SMART_FORMAT_RATE_LIMIT.limit,

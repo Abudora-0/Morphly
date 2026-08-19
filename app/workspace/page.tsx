@@ -2,8 +2,12 @@ import Link from "next/link";
 import { Workspace } from "@/components/workspace/Workspace";
 import { Wordmark } from "@/components/ui/Wordmark";
 import { Arrow } from "@/components/ui/Arrow";
+import { isSmartFormatEnabled } from "@/lib/smartFormat";
 
 export default function WorkspacePage() {
+  // Resolved on the server so the flag never has to be a NEXT_PUBLIC_ var.
+  const smartFormatEnabled = isSmartFormatEnabled();
+
   return (
     <div className="flex h-dvh flex-col">
       <header className="flex items-center justify-between border-b border-line px-5 py-3">
@@ -25,7 +29,7 @@ export default function WorkspacePage() {
         </p>
       </header>
       <main className="flex min-h-0 flex-1 flex-col p-4">
-        <Workspace />
+        <Workspace smartFormatEnabled={smartFormatEnabled} />
       </main>
     </div>
   );

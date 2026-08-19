@@ -8,7 +8,12 @@ import { MAX_TEXT_LENGTH } from "@/lib/limits";
 import { InputPanel } from "@/components/workspace/InputPanel";
 import { ConfigPanel } from "@/components/workspace/ConfigPanel";
 
-export function Workspace() {
+type WorkspaceProps = {
+  /** Resolved on the server; see lib/smartFormat.ts. */
+  smartFormatEnabled: boolean;
+};
+
+export function Workspace({ smartFormatEnabled }: WorkspaceProps) {
   const [text, setText] = useState("");
   const [format, setFormat] = useState<ExportFormat>("docx");
   const [options, setOptions] = useState<ExportOptions>(DEFAULT_EXPORT_OPTIONS);
@@ -125,6 +130,7 @@ export function Workspace() {
       <InputPanel
         value={text}
         onChange={handleTextChange}
+        smartFormatEnabled={smartFormatEnabled}
         onSmartFormat={handleSmartFormat}
         isSmartFormatting={isSmartFormatting}
         smartFormatError={smartFormatError}

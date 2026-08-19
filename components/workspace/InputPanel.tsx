@@ -7,6 +7,7 @@ import { Icon } from "@/components/ui/Icon";
 type InputPanelProps = {
   value: string;
   onChange: (value: string) => void;
+  smartFormatEnabled: boolean;
   onSmartFormat: () => void;
   isSmartFormatting: boolean;
   smartFormatError: string | null;
@@ -20,6 +21,7 @@ const TEXT_FILE_PATTERN = /\.(md|markdown|txt|text)$/i;
 export function InputPanel({
   value,
   onChange,
+  smartFormatEnabled,
   onSmartFormat,
   isSmartFormatting,
   smartFormatError,
@@ -125,6 +127,10 @@ export function InputPanel({
         />
       </div>
 
+      {/* Hidden entirely where no Ollama instance is reachable (see
+          lib/smartFormat.ts). Undo only ever appears after a Smart Format
+          run, so it has nothing to strand. */}
+      {smartFormatEnabled && (
       <div className="flex items-center justify-between gap-3 border-b border-line px-4 py-2">
         <div className="flex items-center gap-3">
           <button
@@ -159,6 +165,7 @@ export function InputPanel({
           Local Ollama · restructures messy input
         </span>
       </div>
+      )}
 
       {(smartFormatError || dropError) && (
         <div

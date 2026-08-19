@@ -78,6 +78,8 @@ Smart Format uses a local [Ollama](https://ollama.com) model to restructure mess
 
 This only works when Morphly itself is running locally, since a deployed instance (e.g. on Vercel) has no network path to your machine's Ollama.
 
+Because of that, Smart Format hides itself on a hosted deployment rather than offering a button that always fails, and `/api/smart-format` returns 404 there. Local development is unaffected. If you do host a reachable Ollama, set `OLLAMA_HOST` to it and the feature turns back on; `SMART_FORMAT=1` or `SMART_FORMAT=0` overrides the detection either way. The check runs at build time, so changing these on a deployment requires a rebuild.
+
 ## Security
 
 - **Rate limiting** and a 100,000-character input cap on both API routes.

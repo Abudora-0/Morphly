@@ -1,6 +1,8 @@
 import Link from "next/link";
 import { Reveal } from "@/components/ui/Reveal";
 import { Arrow } from "@/components/ui/Arrow";
+// Read rather than restated, so the footer cannot drift from the real version.
+import { version } from "@/package.json";
 
 export function FinalCta() {
   return (
@@ -33,7 +35,7 @@ export function FinalCta() {
 
       <div className="mx-auto mt-16 max-w-6xl border-t border-line pt-6">
         <p className="font-mono text-[11px] uppercase tracking-wider text-ink-soft">
-          Morphly · v0.1.0 · MIT Licensed
+          Morphly · v{version} · MIT Licensed
         </p>
       </div>
     </section>
