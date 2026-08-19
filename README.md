@@ -1,36 +1,55 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# Morphly
 
-## Getting Started
+Paste raw text or AI-generated output and export it as a fully formatted native Office file: `.docx`, `.xlsx`, or `.pptx`. No accounts, no uploads to a third party — everything runs through your own local Next.js server.
 
-First, run the development server:
+## How it works
 
-```bash
-npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
+One shared pipeline backs all three formats:
+
+```
+Pasted text
+   │
+   ▼
+Parser (deterministic Markdown, or Smart Format via a local Ollama model)
+   │
+   ▼
+MorphlyDocument (headings, paragraphs, lists, tables, quotes, code, dividers)
+   │
+   ├──► docx generator  (Word)
+   ├──► xlsx generator  (Excel — tables become their own sheets)
+   └──► pptx generator  (PowerPoint — headings become slide breaks)
 ```
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+The parsing and schema logic is written once in [`lib/parser/`](lib/parser); each format's renderer in [`lib/generators/`](lib/generators) consumes the same `MorphlyDocument` shape.
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+## Getting started
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+```bash
+npm install
+npm run dev
+```
 
-## Learn More
+Open [http://localhost:3000](http://localhost:3000), paste some text, pick a format, and export.
 
-To learn more about Next.js, take a look at the following resources:
+## Smart Format (optional)
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
+Smart Format uses a local [Ollama](https://ollama.com) model to restructure messy, non-Markdown input into clean Markdown before conversion. It's entirely optional — the deterministic parser works without it.
 
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
+1. Install Ollama and pull a model: `ollama pull llama3.1`
+2. Run `ollama serve`
+3. Copy `.env.local.example` to `.env.local` and adjust `OLLAMA_HOST` / `OLLAMA_MODEL` if needed
 
-## Deploy on Vercel
+This only works when Morphly itself is running locally — a deployed instance (e.g. on Vercel) has no network path to your machine's Ollama.
 
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
+## Project structure
 
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+- `app/api/convert` — POST `{ text, format, options }` → streams back the generated file
+- `app/api/smart-format` — POST `{ text }` → cleaned Markdown via Ollama
+- `components/workspace/` — the split-screen UI (source text, format tabs, per-format config, live structure preview)
+- `lib/parser/` — Markdown → `MorphlyDocument` schema
+- `lib/generators/` — `MorphlyDocument` → `.docx` / `.xlsx` / `.pptx`
+- `lib/llm/` — the Smart Format provider abstraction (Ollama today; swappable)
+
+## Tech stack
+
+Next.js (App Router) + TypeScript + Tailwind, [`docx`](https://www.npmjs.com/package/docx), [`exceljs`](https://www.npmjs.com/package/exceljs), and [`pptxgenjs`](https://www.npmjs.com/package/pptxgenjs) for file generation, [`remark`](https://github.com/remarkjs/remark) for Markdown parsing.
