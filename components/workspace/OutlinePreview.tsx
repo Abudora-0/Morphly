@@ -13,6 +13,7 @@ const BLOCK_LABEL: Record<string, string> = {
   quote: "❝",
   code: "</>",
   divider: "---",
+  image: "🖼",
 };
 
 export function OutlinePreview({ doc, isEmpty }: OutlinePreviewProps) {
@@ -61,7 +62,9 @@ export function OutlinePreview({ doc, isEmpty }: OutlinePreviewProps) {
                 ? `${block.ordered ? "ordered" : "bullet"} list · ${block.items.length} items`
                 : block.type === "code"
                   ? `code${block.language ? " · " + block.language : ""}`
-                  : block.type;
+                  : block.type === "image"
+                    ? `image${block.alt ? " · " + block.alt : ""}`
+                    : block.type;
 
           return (
             <li key={i} className="flex items-center gap-2 truncate pl-3 font-mono text-xs text-ink-soft">

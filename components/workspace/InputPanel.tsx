@@ -1,3 +1,5 @@
+import { MAX_TEXT_LENGTH } from "@/lib/limits";
+
 type InputPanelProps = {
   value: string;
   onChange: (value: string) => void;
@@ -18,6 +20,7 @@ export function InputPanel({
   onUndoSmartFormat,
 }: InputPanelProps) {
   const words = value.trim().length === 0 ? 0 : value.trim().split(/\s+/).length;
+  const isOverLimit = value.length > MAX_TEXT_LENGTH;
 
   return (
     <div className="flex min-h-0 flex-1 flex-col">
@@ -26,8 +29,14 @@ export function InputPanel({
           01 / Source Text
         </h2>
         <div className="flex items-center gap-3">
-          <span className="font-mono text-[11px] tabular-nums text-ink-soft">
-            {words.toLocaleString()} words · {value.length.toLocaleString()} chars
+          <span
+            className={[
+              "font-mono text-[11px] tabular-nums",
+              isOverLimit ? "text-ppt" : "text-ink-soft",
+            ].join(" ")}
+          >
+            {words.toLocaleString()} words · {value.length.toLocaleString()}
+            {isOverLimit ? ` / ${MAX_TEXT_LENGTH.toLocaleString()} chars (too long)` : " chars"}
           </span>
           <button
             type="button"
@@ -45,7 +54,7 @@ export function InputPanel({
           <button
             type="button"
             onClick={onSmartFormat}
-            disabled={value.trim().length === 0 || isSmartFormatting}
+            disabled={value.trim().length === 0 || isOverLimit || isSmartFormatting}
             className="font-mono text-[11px] uppercase tracking-wider text-ink underline decoration-line underline-offset-2 transition-colors duration-150 hover:decoration-ink disabled:cursor-not-allowed disabled:opacity-30 disabled:hover:decoration-line"
           >
             {isSmartFormatting ? <span className="animate-pulse">Formatting…</span> : "✨ Smart Format"}

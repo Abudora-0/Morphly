@@ -1,13 +1,34 @@
 import { NextRequest, NextResponse } from "next/server";
 import { createOllamaProvider, getOllamaModelName } from "@/lib/llm/ollamaProvider";
 import { LLMProviderError } from "@/lib/llm/provider";
+import { checkRateLimit, getClientIp } from "@/lib/rateLimit";
+import { MAX_TEXT_LENGTH, SMART_FORMAT_RATE_LIMIT } from "@/lib/limits";
 
 export async function POST(request: NextRequest) {
+  const rateLimit = checkRateLimit(
+    `smart-format:${getClientIp(request)}`,
+    SMART_FORMAT_RATE_LIMIT.limit,
+    SMART_FORMAT_RATE_LIMIT.windowMs,
+  );
+  if (!rateLimit.ok) {
+    return NextResponse.json(
+      { error: "Too many Smart Format requests. Please wait a bit before trying again." },
+      { status: 429, headers: { "Retry-After": String(rateLimit.retryAfterSeconds) } },
+    );
+  }
+
   const body = await request.json().catch(() => null);
   const text = body?.text;
 
   if (typeof text !== "string" || text.trim().length === 0) {
     return NextResponse.json({ error: "Missing text to format." }, { status: 400 });
+  }
+
+  if (text.length > MAX_TEXT_LENGTH) {
+    return NextResponse.json(
+      { error: `Text is too long (max ${MAX_TEXT_LENGTH.toLocaleString()} characters).` },
+      { status: 413 },
+    );
   }
 
   try {

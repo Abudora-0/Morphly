@@ -47,6 +47,7 @@ export async function generatePptx(
 
   let lastHeading = doc.title ?? "";
   let tableCount = 0;
+  let imageCount = 0;
 
   for (const block of doc.blocks) {
     if (block.type === "heading" && block.level <= 2) {
@@ -58,6 +59,12 @@ export async function generatePptx(
     if (block.type === "table") {
       tableCount += 1;
       builder.addTableSlide(lastHeading || `Table ${tableCount}`, block.headers, block.rows);
+      continue;
+    }
+
+    if (block.type === "image") {
+      imageCount += 1;
+      builder.addImageSlide(lastHeading || `Image ${imageCount}`, block);
       continue;
     }
 
@@ -152,6 +159,63 @@ class SlideBuilder {
     });
 
     // The next non-heading block should not append to a table slide.
+    this.slide = null;
+    this.pendingBreak = false;
+  }
+
+  addImageSlide(title: string, block: Extract<Block, { type: "image" }>) {
+    const slide = this.pptx.addSlide();
+    slide.addText(title, {
+      x: MARGIN_X,
+      y: TITLE_Y,
+      w: CONTENT_W,
+      h: TITLE_H,
+      fontSize: 26,
+      bold: true,
+      color: INK,
+    });
+    slide.addShape(this.pptx.ShapeType.rect, {
+      x: MARGIN_X,
+      y: RULE_Y,
+      w: CONTENT_W,
+      h: 0.03,
+      fill: { color: ACCENT },
+      line: { color: ACCENT },
+    });
+
+    const availW = CONTENT_W;
+    const availH = this.contentBottom - CONTENT_Y;
+
+    if (!block.resolved) {
+      slide.addText(`[Image unavailable: ${block.alt || block.url}]`, {
+        x: MARGIN_X,
+        y: CONTENT_Y,
+        w: availW,
+        h: availH,
+        align: "center",
+        valign: "middle",
+        italic: true,
+        color: INK_SOFT,
+        fontSize: 14,
+      });
+    } else {
+      const { data, format, width, height } = block.resolved;
+      const scale = Math.min(1, availW / width, availH / height);
+      const w = width * scale;
+      const h = height * scale;
+      const mime = format === "jpg" ? "jpeg" : format;
+
+      slide.addImage({
+        data: `data:image/${mime};base64,${data.toString("base64")}`,
+        x: MARGIN_X + (availW - w) / 2,
+        y: CONTENT_Y + (availH - h) / 2,
+        w,
+        h,
+        altText: block.alt || undefined,
+      });
+    }
+
+    // The next non-heading block should not append to an image slide.
     this.slide = null;
     this.pendingBreak = false;
   }

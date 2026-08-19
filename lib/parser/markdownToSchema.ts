@@ -37,8 +37,19 @@ function convertBlock(node: RootContent): Block | null {
         spans: convertInline(node.children),
       };
 
-    case "paragraph":
+    case "paragraph": {
+      // An image on its own line (`![alt](url)`) becomes a dedicated image
+      // block rather than a paragraph — that's the overwhelmingly common
+      // case in pasted content, and the format generators need a real
+      // block to anchor/size the embedded image against, not inline text.
+      // An image mixed with other text is left as a paragraph and the
+      // image reference itself is dropped (see convertInline's default case).
+      const [only] = node.children;
+      if (node.children.length === 1 && only.type === "image") {
+        return { type: "image", url: only.url, alt: only.alt ?? "" };
+      }
       return { type: "paragraph", spans: convertInline(node.children) };
+    }
 
     case "blockquote": {
       const spans = node.children.flatMap((child) =>

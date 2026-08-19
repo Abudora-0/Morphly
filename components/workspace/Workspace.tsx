@@ -4,6 +4,7 @@ import { useMemo, useState } from "react";
 import { markdownToSchema } from "@/lib/parser/markdownToSchema";
 import type { ExportFormat, ExportOptions } from "@/lib/exportFormat";
 import { DEFAULT_EXPORT_OPTIONS } from "@/lib/exportFormat";
+import { MAX_TEXT_LENGTH } from "@/lib/limits";
 import { InputPanel } from "@/components/workspace/InputPanel";
 import { ConfigPanel } from "@/components/workspace/ConfigPanel";
 
@@ -19,7 +20,7 @@ export function Workspace() {
   const [preSmartFormatText, setPreSmartFormatText] = useState<string | null>(null);
 
   const doc = useMemo(() => markdownToSchema(text), [text]);
-  const isEmpty = text.trim().length === 0;
+  const isEmpty = text.trim().length === 0 || text.length > MAX_TEXT_LENGTH;
 
   function handleTextChange(next: string) {
     setText(next);

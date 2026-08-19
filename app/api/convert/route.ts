@@ -4,6 +4,9 @@ import { generateDocx } from "@/lib/generators/docx/generateDocx";
 import { generateXlsx } from "@/lib/generators/xlsx/generateXlsx";
 import { generatePptx } from "@/lib/generators/pptx/generatePptx";
 import type { DocxOptions, PptxOptions, XlsxOptions } from "@/lib/exportFormat";
+import { checkRateLimit, getClientIp } from "@/lib/rateLimit";
+import { CONVERT_RATE_LIMIT, MAX_TEXT_LENGTH } from "@/lib/limits";
+import { resolveDocumentImages } from "@/lib/images/resolveDocumentImages";
 
 const CONTENT_TYPES = {
   docx: "application/vnd.openxmlformats-officedocument.wordprocessingml.document",
@@ -46,12 +49,31 @@ function parsePptxOptions(raw: unknown): PptxOptions {
 }
 
 export async function POST(request: NextRequest) {
+  const rateLimit = checkRateLimit(
+    `convert:${getClientIp(request)}`,
+    CONVERT_RATE_LIMIT.limit,
+    CONVERT_RATE_LIMIT.windowMs,
+  );
+  if (!rateLimit.ok) {
+    return NextResponse.json(
+      { error: "Too many conversions. Please wait a bit before trying again." },
+      { status: 429, headers: { "Retry-After": String(rateLimit.retryAfterSeconds) } },
+    );
+  }
+
   const body = await request.json().catch(() => null);
   const text = body?.text;
   const format = body?.format;
 
   if (typeof text !== "string" || text.trim().length === 0) {
     return NextResponse.json({ error: "Missing text to convert." }, { status: 400 });
+  }
+
+  if (text.length > MAX_TEXT_LENGTH) {
+    return NextResponse.json(
+      { error: `Text is too long (max ${MAX_TEXT_LENGTH.toLocaleString()} characters).` },
+      { status: 413 },
+    );
   }
 
   if (!isSupportedFormat(format)) {
@@ -61,7 +83,8 @@ export async function POST(request: NextRequest) {
     );
   }
 
-  const doc = markdownToSchema(text);
+  const parsed = markdownToSchema(text);
+  const doc = await resolveDocumentImages(parsed);
 
   let buffer: Buffer;
   switch (format) {

@@ -3,6 +3,7 @@ import {
   BorderStyle,
   Document,
   HeadingLevel,
+  ImageRun,
   LevelFormat,
   Packer,
   Paragraph,
@@ -24,6 +25,8 @@ const ORDERED_LIST = "morphly-ordered";
 const CODE_FONT = "Consolas";
 const CODE_SHADING = "F3F3F3";
 const QUOTE_BORDER_COLOR = "BFBFBF";
+const SOFT_TEXT_COLOR = "808080";
+const MAX_IMAGE_WIDTH_PX = 600; // fits within Letter/A4 content width with margin to spare
 
 const HEADING_MAP = {
   1: HeadingLevel.HEADING_1,
@@ -148,6 +151,41 @@ function blockToDocx(block: Block): (Paragraph | Table)[] {
           children: [],
         }),
       ];
+
+    case "image": {
+      if (!block.resolved) {
+        return [
+          new Paragraph({
+            children: [
+              new TextRun({
+                text: `[Image unavailable: ${block.alt || block.url}]`,
+                italics: true,
+                color: SOFT_TEXT_COLOR,
+              }),
+            ],
+          }),
+        ];
+      }
+
+      const { data, format, width, height } = block.resolved;
+      const scale = Math.min(1, MAX_IMAGE_WIDTH_PX / width);
+      return [
+        new Paragraph({
+          children: [
+            new ImageRun({
+              type: format,
+              data,
+              transformation: { width: Math.round(width * scale), height: Math.round(height * scale) },
+              altText: {
+                title: block.alt || "Image",
+                description: block.alt || "Image",
+                name: "Image",
+              },
+            }),
+          ],
+        }),
+      ];
+    }
 
     default:
       return [];

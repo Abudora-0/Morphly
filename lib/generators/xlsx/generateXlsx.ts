@@ -11,6 +11,8 @@ const HEADER_BORDER: Partial<ExcelJS.Borders> = {
 const OVERVIEW_WIDTH = 110;
 const MIN_COL_WIDTH = 10;
 const MAX_COL_WIDTH = 42;
+const MAX_IMAGE_WIDTH_PX = 700; // roughly matches the Overview column's width
+const EXCEL_ROW_HEIGHT_PX = 20; // default row height, used to reserve space under an anchored image
 
 type TableSheet = {
   name: string;
@@ -35,7 +37,7 @@ export async function generateXlsx(
 
   if (shouldRenderOverview) {
     const overviewName = reserveName("Overview", usedNames);
-    buildOverviewSheet(workbook.addWorksheet(overviewName), doc.title, overviewBlocks, tables);
+    buildOverviewSheet(workbook, workbook.addWorksheet(overviewName), doc.title, overviewBlocks, tables);
   }
 
   for (const table of tables) {
@@ -84,6 +86,7 @@ function splitBlocks(doc: MorphlyDocument): { overviewBlocks: OverviewEntry[]; t
 // --- Overview sheet -----------------------------------------------------
 
 function buildOverviewSheet(
+  workbook: ExcelJS.Workbook,
   sheet: ExcelJS.Worksheet,
   title: string | undefined,
   entries: OverviewEntry[],
@@ -99,7 +102,7 @@ function buildOverviewSheet(
   }
 
   for (const entry of entries) {
-    addOverviewRow(sheet, entry);
+    addOverviewRow(workbook, sheet, entry);
   }
 
   if (tables.length > 0 && entries.some((e) => e.block.type !== "table")) {
@@ -107,7 +110,7 @@ function buildOverviewSheet(
   }
 }
 
-function addOverviewRow(sheet: ExcelJS.Worksheet, entry: OverviewEntry) {
+function addOverviewRow(workbook: ExcelJS.Workbook, sheet: ExcelJS.Worksheet, entry: OverviewEntry) {
   const { block } = entry;
 
   switch (block.type) {
@@ -156,6 +159,33 @@ function addOverviewRow(sheet: ExcelJS.Worksheet, entry: OverviewEntry) {
     case "divider":
       sheet.addRow([]);
       return;
+
+    case "image": {
+      if (!block.resolved) {
+        const row = sheet.addRow([`[Image unavailable: ${block.alt || block.url}]`]);
+        row.font = { italic: true, color: { argb: "FF808080" } };
+        return;
+      }
+
+      const { data, format, width, height } = block.resolved;
+      const scale = Math.min(1, MAX_IMAGE_WIDTH_PX / width);
+      const w = Math.round(width * scale);
+      const h = Math.round(height * scale);
+
+      // exceljs's own .d.ts declares an ambient `Buffer` interface that
+      // collides with (and structurally disagrees with) Node's real Buffer
+      // type — same upstream quirk worked around in generateXlsx's own
+      // writeBuffer() call. The value is a genuine Node Buffer either way.
+      const imageId = workbook.addImage({
+        buffer: data as unknown as ExcelJS.Buffer,
+        extension: format === "jpg" ? "jpeg" : format,
+      });
+      sheet.addImage(imageId, { tl: { col: 0, row: sheet.rowCount }, ext: { width: w, height: h } });
+
+      const rowsNeeded = Math.max(1, Math.ceil(h / EXCEL_ROW_HEIGHT_PX));
+      for (let i = 0; i < rowsNeeded; i++) sheet.addRow([]);
+      return;
+    }
   }
 }
 
