@@ -15,6 +15,7 @@ const CONTENT_Y = 1.3;
 const BOTTOM_MARGIN = 0.4;
 const GAP = 0.12;
 const TITLE_SLIDE_BOX_H = 1.4;
+const PX_PER_INCH = 96; // image-size reports pixels; pptxgenjs positions in inches
 
 const ACCENT = "C8410C"; // PowerPoint orange, used only as a title underline
 const INK = "141414";
@@ -200,9 +201,15 @@ class SlideBuilder {
       });
     } else {
       const { data, format, width, height } = block.resolved;
-      const scale = Math.min(1, availW / width, availH / height);
-      const w = width * scale;
-      const h = height * scale;
+      // pptxgenjs's w/h are in inches, but width/height here are pixels
+      // (from image-size) — convert at 96dpi before fitting, otherwise a
+      // small source image (e.g. a 72px icon) gets scaled up to fill the
+      // whole content box and comes out blurry.
+      const nativeW = width / PX_PER_INCH;
+      const nativeH = height / PX_PER_INCH;
+      const scale = Math.min(1, availW / nativeW, availH / nativeH);
+      const w = nativeW * scale;
+      const h = nativeH * scale;
       const mime = format === "jpg" ? "jpeg" : format;
 
       slide.addImage({

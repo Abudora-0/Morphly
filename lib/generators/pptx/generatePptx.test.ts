@@ -24,6 +24,14 @@ async function sldSz(buffer: Buffer): Promise<{ cx: string; cy: string }> {
   return { cx: match[1], cy: match[2] };
 }
 
+async function pictureExtentEmu(buffer: Buffer, slideIndex: number): Promise<{ cx: number; cy: number }> {
+  const zip = await JSZip.loadAsync(buffer);
+  const xml = await zip.file(`ppt/slides/slide${slideIndex}.xml`)!.async("string");
+  const picBlock = xml.match(/<p:pic>[\s\S]*?<\/p:pic>/)![0];
+  const match = picBlock.match(/<a:ext cx="(\d+)" cy="(\d+)"\s*\/>/)!;
+  return { cx: Number(match[1]), cy: Number(match[2]) };
+}
+
 describe("generatePptx", () => {
   it("gives the title its own slide, then one slide per top-level heading", async () => {
     const doc = markdownToSchema("# Deck\n\n## Slide One\n\n- point");
@@ -92,6 +100,21 @@ describe("generatePptx", () => {
     const zip = await JSZip.loadAsync(buffer);
     const slideXml = await zip.file("ppt/slides/slide1.xml")!.async("string");
     expect(slideXml).toContain("<p:pic>");
+  });
+
+  // Regression test: image-size reports pixels, but pptxgenjs positions
+  // shapes in inches. A small source image used to get stretched to fill
+  // the whole content box (and come out blurry) because the pixel value
+  // was fed straight into the inches field without conversion.
+  it("sizes a small image at its native dimensions (96dpi) instead of stretching it to fill the slide", async () => {
+    const doc: MorphlyDocument = {
+      blocks: [{ type: "image", url: "https://x.test/icon.png", alt: "icon", resolved: fakeResolvedPng(400, 200) }],
+    };
+    const buffer = await generatePptx(doc, DEFAULT_EXPORT_OPTIONS.pptx);
+    const extent = await pictureExtentEmu(buffer, 1);
+
+    // 400px / 96dpi * 914400 EMU/in = 3,810,000 EMU (and half that for 200px)
+    expect(extent).toEqual({ cx: 3810000, cy: 1905000 });
   });
 
   it("renders a fallback notice on the slide when image resolution failed", async () => {
