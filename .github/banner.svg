@@ -1,0 +1,18 @@
+<svg width="1200" height="320" viewBox="0 0 1200 320" xmlns="http://www.w3.org/2000/svg">
+  <rect x="1" y="1" width="1198" height="318" fill="#FAF9F6" stroke="#141414" stroke-width="1.5" />
+
+  <svg x="400" y="70" width="160" height="160" viewBox="0 0 100 100">
+    <defs>
+      <clipPath id="banner-m-l"><rect x="0" y="0" width="34" height="100" /></clipPath>
+      <clipPath id="banner-m-m"><rect x="34" y="0" width="33" height="100" /></clipPath>
+      <clipPath id="banner-m-r"><rect x="67" y="0" width="33" height="100" /></clipPath>
+    </defs>
+    <path d="M10,18 L10,82 L28,82 L28,42 L50,66 L72,42 L72,82 L90,82 L90,18 L72,18 L50,40 L28,18 Z" fill="#2B579A" clip-path="url(#banner-m-l)" />
+    <path d="M10,18 L10,82 L28,82 L28,42 L50,66 L72,42 L72,82 L90,82 L90,18 L72,18 L50,40 L28,18 Z" fill="#217346" clip-path="url(#banner-m-m)" />
+    <path d="M10,18 L10,82 L28,82 L28,42 L50,66 L72,42 L72,82 L90,82 L90,18 L72,18 L50,40 L28,18 Z" fill="#C8410C" clip-path="url(#banner-m-r)" />
+  </svg>
+
+  <text x="575" y="196" font-family="ui-sans-serif, system-ui, 'Segoe UI', Helvetica, Arial, sans-serif" font-weight="700" font-size="132" fill="#141414">orphly</text>
+
+  <text x="600" y="270" text-anchor="middle" font-family="ui-monospace, 'Cascadia Code', 'Segoe UI Mono', Consolas, monospace" font-size="19" letter-spacing="3" fill="#55534D">AI TEXT &#8594; NATIVE OFFICE FILES</text>
+</svg>
