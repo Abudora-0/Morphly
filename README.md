@@ -68,6 +68,10 @@ Run the test suite with:
 npm test
 ```
 
+It runs as two projects: `lib` covers the parser, generators, and image safety under Node, while `components` renders the UI under jsdom. Target one with `npm test -- --project lib`.
+
+Export settings (chosen format and its per-format options) are remembered in `localStorage` under `morphly.export-preferences.v1`. Nothing else is stored, and the record is validated field by field on read, so an edited or outdated one degrades to defaults rather than reaching the generators.
+
 ## Smart Format (optional)
 
 Smart Format uses a local [Ollama](https://ollama.com) model to restructure messy, non-Markdown input into clean Markdown before conversion. It's entirely optional, since the deterministic parser works without it.

@@ -3,8 +3,12 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { markdownToSchema } from "@/lib/parser/markdownToSchema";
 import type { ExportFormat, ExportOptions } from "@/lib/exportFormat";
-import { DEFAULT_EXPORT_OPTIONS } from "@/lib/exportFormat";
 import { MAX_TEXT_LENGTH } from "@/lib/limits";
+import {
+  DEFAULT_EXPORT_PREFERENCES,
+  readExportPreferences,
+  writeExportPreferences,
+} from "@/lib/exportPreferences";
 import { InputPanel } from "@/components/workspace/InputPanel";
 import { ConfigPanel } from "@/components/workspace/ConfigPanel";
 
@@ -15,8 +19,11 @@ type WorkspaceProps = {
 
 export function Workspace({ smartFormatEnabled }: WorkspaceProps) {
   const [text, setText] = useState("");
-  const [format, setFormat] = useState<ExportFormat>("docx");
-  const [options, setOptions] = useState<ExportOptions>(DEFAULT_EXPORT_OPTIONS);
+  // Starts at the defaults so the first client render matches the
+  // prerendered HTML, then hydrates from localStorage on mount.
+  const [format, setFormat] = useState<ExportFormat>(DEFAULT_EXPORT_PREFERENCES.format);
+  const [options, setOptions] = useState<ExportOptions>(DEFAULT_EXPORT_PREFERENCES.options);
+  const [hasLoadedPreferences, setHasLoadedPreferences] = useState(false);
   const [isConverting, setIsConverting] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [didExport, setDidExport] = useState(false);
@@ -28,6 +35,28 @@ export function Workspace({ smartFormatEnabled }: WorkspaceProps) {
 
   const doc = useMemo(() => markdownToSchema(text), [text]);
   const isEmpty = text.trim().length === 0 || text.length > MAX_TEXT_LENGTH;
+
+  useEffect(() => {
+    // Deliberate exception to set-state-in-effect. localStorage cannot be read
+    // during render without diverging from the prerendered HTML, and this is a
+    // one-time load rather than an ongoing subscription, so useSyncExternalStore
+    // would be the wrong shape. React batches these into a single extra render,
+    // which is the whole cost.
+    const stored = readExportPreferences();
+    /* eslint-disable react-hooks/set-state-in-effect */
+    setFormat(stored.format);
+    setOptions(stored.options);
+    setHasLoadedPreferences(true);
+    /* eslint-enable react-hooks/set-state-in-effect */
+  }, []);
+
+  useEffect(() => {
+    // Guarded so the initial defaults never overwrite a stored record. Both
+    // effects run on mount before the read's state update is applied, so
+    // without this the mount pass writes defaults over what was just read.
+    if (!hasLoadedPreferences) return;
+    writeExportPreferences({ format, options });
+  }, [hasLoadedPreferences, format, options]);
 
   function handleTextChange(next: string) {
     setText(next);
