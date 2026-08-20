@@ -88,6 +88,7 @@ Because of that, Smart Format hides itself on a hosted deployment rather than of
 
 - **Rate limiting** and a 100,000-character input cap on both API routes.
 - **Image fetching is SSRF-guarded**: only `http(s)` and `data:` URLs are allowed, the DNS-resolved IP is checked against private/reserved ranges (including cloud metadata addresses) before every request and after every redirect hop, and fetches are capped by size and time.
+- **Image bytes are identified by signature, not by the server's `Content-Type`**, and anything that is not a PNG, JPEG, or GIF is dropped before the dimension parser runs. The parser (`image-size`) has published infinite-loop advisories for its ICNS, JXL, and HEIF paths with no fixed release, and it selects a parser from the magic bytes, so checking first is what keeps those paths unreachable.
 - A blocked or failed image degrades to a visible "unavailable" notice rather than silently failing the whole export.
 
 ## Project structure
