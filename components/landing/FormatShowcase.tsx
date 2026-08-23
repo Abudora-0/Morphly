@@ -1,4 +1,5 @@
 import { Reveal } from "@/components/ui/Reveal";
+import { PROMPT_RECIPES } from "@/lib/promptRecipes";
 
 const FORMATS = [
   {
@@ -68,6 +69,10 @@ export function FormatShowcase() {
                       </li>
                     ))}
                   </ul>
+                  {/* The same line the tool shows above its copyable prompt. */}
+                  <p className="mt-4 border-t border-line pt-3 text-[12px] leading-snug text-ink-soft">
+                    {PROMPT_RECIPES[format.ext].summary}
+                  </p>
                 </div>
               </div>
             </Reveal>
