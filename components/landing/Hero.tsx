@@ -41,6 +41,15 @@ export function Hero() {
             <span className="text-ink">.xlsx</span>, or <span className="text-ink">.pptx</span> file.
             Not HTML wrapped in a file extension, but real native formatting, tables, and slides.
           </p>
+          {/* Stacked layouts put the whole right-hand column after this one,
+              which would leave the mark below the buttons. Render it here for
+              those widths and hide the other copy; it is aria-hidden in both
+              places, so nothing is announced twice. */}
+          <MMark
+            className="mx-auto mt-10 h-28 w-28 sm:h-32 sm:w-32 lg:hidden"
+            bandClassNames={["wordmark-band-1", "wordmark-band-2", "wordmark-band-3"]}
+          />
+
           <div
             className="enter-up mt-8 flex flex-wrap items-center gap-6"
             style={{ animationDelay: "320ms" }}
@@ -64,7 +73,7 @@ export function Hero() {
 
         <div className="flex flex-col items-center gap-8">
           <MMark
-            className="h-32 w-32 sm:h-40 sm:w-40"
+            className="hidden lg:block lg:h-40 lg:w-40"
             bandClassNames={["wordmark-band-1", "wordmark-band-2", "wordmark-band-3"]}
           />
           <div
