@@ -8,7 +8,7 @@
 [![Next.js](https://img.shields.io/badge/Next.js-16-141414?style=flat-square&logo=next.js&logoColor=white)](https://nextjs.org)
 [![TypeScript](https://img.shields.io/badge/TypeScript-5-2B579A?style=flat-square&logo=typescript&logoColor=white)](https://www.typescriptlang.org)
 [![Tailwind CSS](https://img.shields.io/badge/Tailwind_CSS-4-141414?style=flat-square&logo=tailwindcss&logoColor=38BDF8)](https://tailwindcss.com)
-[![Deployed on Vercel](https://img.shields.io/badge/deployed-vercel-141414?style=flat-square&logo=vercel&logoColor=white)](https://morphly-beta.vercel.app)
+[![Deployed on Vercel](https://img.shields.io/badge/deployed-vercel-141414?style=flat-square&logo=vercel&logoColor=white)](https://morphlyy.vercel.app)
 
 [![.DOCX](https://img.shields.io/badge/.DOCX-2B579A?style=flat-square)](#)
 [![.XLSX](https://img.shields.io/badge/.XLSX-217346?style=flat-square)](#)
@@ -16,7 +16,7 @@
 
 **Paste raw text or AI-generated output. Export a real, native Office file.**
 
-[Live demo](https://morphly-beta.vercel.app) · [Report a bug](https://github.com/Abudora-0/Morphly/issues)
+[Live demo](https://morphlyy.vercel.app) · [Report a bug](https://github.com/Abudora-0/Morphly/issues)
 
 </div>
 

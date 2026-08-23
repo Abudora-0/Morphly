@@ -17,7 +17,7 @@ const spaceGrotesk = Space_Grotesk({
   subsets: ["latin"],
 });
 
-const SITE_URL = "https://morphly-beta.vercel.app";
+const SITE_URL = "https://morphlyy.vercel.app";
 const TITLE = "Morphly: Paste AI output, export Office files";
 const DESCRIPTION =
   "Convert raw AI-generated text into fully formatted .docx, .xlsx, and .pptx files.";
