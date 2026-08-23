@@ -23,6 +23,17 @@ describe("prompt recipes", () => {
     }
   });
 
+  it("ends each prompt on a worked example, so it can be run as-is", () => {
+    for (const [format, recipe] of Object.entries(PROMPT_RECIPES)) {
+      const topic = recipe.prompt.split("Topic:").at(-1)?.trim() ?? "";
+
+      expect(topic, `${format} has no topic line`).not.toBe("");
+      // A bracketed or angle-bracketed stand-in would need editing before use.
+      expect(topic, `${format} still uses a placeholder`).not.toMatch(/[[<]/);
+      expect(topic.length, `${format} topic is too thin to be illustrative`).toBeGreaterThan(40);
+    }
+  });
+
   describe("docx: 'begin with a single # Title line, with nothing above it'", () => {
     it("promotes a leading H1 to the document title", () => {
       const doc = markdownToSchema("# Quarterly Report\n\n## Overview\n\nText.");

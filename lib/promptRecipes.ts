@@ -20,7 +20,10 @@ export type PromptRecipe = {
   prompt: string;
 };
 
-const TOPIC_PLACEHOLDER = "[describe your topic here]";
+// Each prompt ends on a worked example rather than a placeholder, so it can be
+// pasted into an AI and run as-is to see what a good result looks like. The
+// examples are chosen to exercise the format they belong to: per-region tables
+// for the spreadsheet, one section per slide for the deck.
 
 export const PROMPT_RECIPES: Record<ExportFormat, PromptRecipe> = {
   docx: {
@@ -33,7 +36,7 @@ export const PROMPT_RECIPES: Record<ExportFormat, PromptRecipe> = {
 - Put any tabular data in a Markdown table with a header row.
 - Reply with the Markdown only: no commentary, and do not wrap it in a code fence.
 
-Topic: ${TOPIC_PLACEHOLDER}`,
+Topic: An onboarding guide for engineers joining a small software team. Cover first-day setup, how code review works, the release process, and who to ask for help. Include a table of the internal tools and what each is for.`,
   },
   xlsx: {
     summary: "Every table becomes its own sheet, named after the heading above it.",
@@ -45,7 +48,7 @@ Topic: ${TOPIC_PLACEHOLDER}`,
 - Put any explanatory text before the first table.
 - Reply with the Markdown only: no commentary, and do not wrap it in a code fence.
 
-Topic: ${TOPIC_PLACEHOLDER}`,
+Topic: A 2025 sales summary. Give one table per region for North America, Europe, and Asia Pacific, each listing product, units sold, unit price, and total revenue. Add a short paragraph before the tables summarising the year.`,
   },
   pptx: {
     summary: "Each top-level heading starts a new slide, so keep sections short.",
@@ -57,6 +60,6 @@ Topic: ${TOPIC_PLACEHOLDER}`,
 - Use "### " for a sub-heading that should stay on the same slide.
 - Reply with the Markdown only: no commentary, and do not wrap it in a code fence.
 
-Topic: ${TOPIC_PLACEHOLDER}`,
+Topic: A kickoff deck for a company website redesign, with one slide each for goals, scope, timeline, the team, risks, and next steps.`,
   },
 };
